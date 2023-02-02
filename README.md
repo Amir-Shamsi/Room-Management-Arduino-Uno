@@ -69,10 +69,10 @@ The air conditioner turns off when the temperature reaches 25 degrees Celsius.
   
 | The amount of light measured by the photocell | Light intensity of the lighting system |
 :------------:|:-----:
-0 < Temperature < 25   | 100 percent
-25 < Temperature < 50   |75 percent
-50 < Temperature < 75   |50 percent
-75 < Temperature < 100  |25 percent
+0 <  Amount of light < 25   | 100 percent
+25 <  Amount of light < 50   |75 percent
+50 <  Amount of light < 75   |50 percent
+75 <  Amount of light < 100  |25 percent
   
 *Table 3: The light intensity of the lighting system is determined by the Cycle Duty.*
 
