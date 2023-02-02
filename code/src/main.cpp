@@ -24,3 +24,50 @@ Serial.begin(9600);
 lcd.begin(16, 2);
 lcd.print("Light | Temp:");
 }
+unsigned long last_time = 0;
+void sendViaUART(int LDR_AVG, int temp){
+  if ( millis() - last_time > 1000 ){
+    last_time = millis();
+
+    Serial.print("\r\nTemp:");
+    Serial.print(temp);
+    Serial.print(" Light:");
+    Serial.print(LDR_AVG);
+
+    Serial.print("\n\rManual Light:");
+    Serial.print(manualLight);
+    Serial.print("\n\rManual Temp:");
+    Serial.print(manualTemp);
+
+  }
+}
+
+int convert(String str){
+	int x=0;
+  int i=1;
+	char ch = str[i];
+	while(ch>=48 && ch <=57){
+		x=x*10+(ch-48);
+		i++;
+		ch=str[i];
+	}
+	return x;
+}
+
+void receiveViaUART(){
+    if(Serial.available( )>0) {
+        String buffer = Serial.readString();
+        if (buffer[0] == 'L') {
+            manualLight = convert(buffer);
+        }
+        else if (buffer[0] == 'T') {
+            manualTemp = convert(buffer);
+        }
+        else{
+            // print some error message
+            // preserve current valeus
+        }
+    }
+}
+  sendViaUART(LDR_AVG, temp);
+  updateLCD(LDR_AVG, temp);
