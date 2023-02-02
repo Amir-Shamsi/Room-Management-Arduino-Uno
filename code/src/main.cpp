@@ -24,9 +24,45 @@ Serial.begin(9600);
 lcd.begin(16, 2);
 lcd.print("Light | Temp:");
 }
+
 void setMode(){
   is_lamps_auto = ! digitalRead(MODE_PIN2);
   is_fan_auto = ! digitalRead(MODE_PIN3);
+}
+
+void runLampAutoMode(int value){
+  if(0 <= value && value < 25)
+    analogWrite(LAMPS_PIN, map(100, 0, 100, 0, 255));
+  else if(25 <= value && value < 50)
+    analogWrite(LAMPS_PIN, map(75, 0, 100, 0, 255));
+  else if(50 <= value && value < 75)
+    analogWrite(LAMPS_PIN, map(50, 0, 100, 0, 255));
+  else if(75 <= value && value <= 100)
+    analogWrite(LAMPS_PIN, map(25, 0, 100, 0, 255));
+}
+
+int getLightAVG(){
+  LDR1Value = map(analogRead(LDR1_PIN) * 0.0048828125, 0, 5, 0, 100);
+  LDR2Value = map(analogRead(LDR2_PIN) * 0.0048828125, 0, 5, 0, 100);
+  int LDR_AVG = (LDR1Value + LDR2Value) / 2;
+  return LDR_AVG;
+}
+
+void updateLCD(int LDR_AVG, int temp){
+  lcd.setCursor(0,1);
+  sprintf(text, "%d | %d^C", LDR_AVG, temp);
+  lcd.print(text);
+}
+
+void runLampManualMode(int value){
+    analogWrite(LAMPS_PIN, map(value, 0, 100, 0, 255));
+}
+
+void manageLamps(int LDR_AVG, int manualLight){
+  if (is_lamps_auto)
+    runLampAutoMode(LDR_AVG);
+  else
+    runLampManualMode(manualLight);
 }
 
 unsigned long last_time = 0;
@@ -74,5 +110,12 @@ void receiveViaUART(){
         }
     }
 }
+
+void loop() {
+  setMode();
+
+  int LDR_AVG = getLightAVG();
   sendViaUART(LDR_AVG, temp);
   updateLCD(LDR_AVG, temp);
+  receiveViaUART();
+  manageLamps(LDR_AVG, manualLight);
