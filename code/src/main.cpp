@@ -54,6 +54,15 @@ void updateLCD(int LDR_AVG, int temp){
   lcd.print(text);
 }
 
+int getTemp(){
+  int temp_adc_val;
+  float temp_val;
+  temp_adc_val = analogRead(TEMP_PIN);
+  temp_val = (temp_adc_val * 4.88);
+  temp_val = (temp_val/10);
+  return (int)temp_val;
+}
+
 void runLampManualMode(int value){
     analogWrite(LAMPS_PIN, map(value, 0, 100, 0, 255));
 }
@@ -63,6 +72,29 @@ void manageLamps(int LDR_AVG, int manualLight){
     runLampAutoMode(LDR_AVG);
   else
     runLampManualMode(manualLight);
+}
+
+void runFanAutoMode(int value){
+  if(value <= 25)
+    digitalWrite(FANS_PIN, 0);
+  else if(30 <= value && value < 35)
+    analogWrite(FANS_PIN, map(30, 0, 100, 0, 255));
+  else if(35 <= value && value < 40)
+    analogWrite(FANS_PIN, map(50, 0, 100, 0, 255));
+  else if(40 <= value && value < 45)
+    analogWrite(FANS_PIN, map(70, 0, 100, 0, 255));
+  else if(45 <= value && value <= 50)
+    analogWrite(FANS_PIN, map(100, 0, 100, 0, 255));
+}
+void runFanManualMode(int value){
+    analogWrite(FANS_PIN, map(value, 0, 100, 0, 255));
+}
+
+void manageFan(int temp, int manualTemp){
+  if (is_fan_auto)
+    runFanAutoMode(temp);
+  else
+    runFanManualMode(manualTemp);
 }
 
 unsigned long last_time = 0;
@@ -115,7 +147,11 @@ void loop() {
   setMode();
 
   int LDR_AVG = getLightAVG();
+  int temp = getTemp();
   sendViaUART(LDR_AVG, temp);
   updateLCD(LDR_AVG, temp);
   receiveViaUART();
   manageLamps(LDR_AVG, manualLight);
+  manageFan(temp, manualTemp);
+  
+}
