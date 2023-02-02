@@ -24,6 +24,11 @@ Serial.begin(9600);
 lcd.begin(16, 2);
 lcd.print("Light | Temp:");
 }
+void setMode(){
+  is_lamps_auto = ! digitalRead(MODE_PIN2);
+  is_fan_auto = ! digitalRead(MODE_PIN3);
+}
+
 unsigned long last_time = 0;
 void sendViaUART(int LDR_AVG, int temp){
   if ( millis() - last_time > 1000 ){
